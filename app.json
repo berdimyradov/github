@@ -19,7 +19,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.berdimyradov.ghclient"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,6 +30,14 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9aa7c8cf-8c25-4372-9e07-a67255f7f2b0"
+      }
     }
-  }
+  },
+  "plugin": [
+    "expo-community-flipper"
+  ]
 }
