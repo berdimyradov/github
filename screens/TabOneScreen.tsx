@@ -12,7 +12,7 @@ const RepositoryCard = (props) => {
   return (
     <Card style={styles.card} mode="outlined">
       <Card.Title
-        title={nameWithOwner}
+        title={<Text style={styles.cardTitle}>{nameWithOwner}</Text>}
         subtitle={description}
         left={() => (
           <Avatar.Image
@@ -41,11 +41,15 @@ const RepositoryCard = (props) => {
 };
 
 const IssueCard = (props) => {
-  const { title, author } = props.item;
+  const { title, number, author } = props.item;
   return (
     <Card style={styles.card} mode="outlined">
       <Card.Title
-        title={`${author.login} / ${title}`}
+        title={
+          <Text
+            style={styles.cardTitle}
+          >{`${author.login} / ${title}  #${number}`}</Text>
+        }
         subtitle={title}
         left={() => <FontAwesome5 name="dot-circle" size={24} color="green" />}
       />
@@ -59,7 +63,7 @@ const UserCard = (props) => {
   return (
     <Card style={styles.card} mode="outlined">
       <Card.Title
-        title={name}
+        title={<Text style={styles.cardTitle}>{name}</Text>}
         subtitle={login}
         left={() => (
           <Avatar.Image
@@ -103,17 +107,16 @@ export default function TabOneScreen({
   const onSubmit = async (query) => {
     setData([]);
     setIsLoading(true);
-
     const needle = query.nativeEvent.text;
     const repos = await GitHubGraphQL.searchRepositories(needle);
     const issues = await GitHubGraphQL.searchIssues(needle);
     const users = await GitHubGraphQL.searchUsers(needle);
-    console.log("REPOS", JSON.stringify(repos));
-    console.log("ISSUES", JSON.stringify(issues));
-    console.log("USERS", JSON.stringify(users));
+    // console.log("REPOS", JSON.stringify(repos));
+    // console.log("ISSUES", JSON.stringify(issues));
+    // console.log("USERS", JSON.stringify(users));
 
     setData([
-      { title: "Repositories", data: repos },
+      { title: "Repositories", data: repos,  },
       { title: "Issues", data: issues },
       { title: "Users", data: users },
     ]);
@@ -135,16 +138,19 @@ export default function TabOneScreen({
         </View>
       )}
 
-      {(!isLoading && !!data.length) && (
+      {!isLoading && !!data.length && (
         <SectionList
           sections={data}
           keyExtractor={(item, index) => item + index}
           renderItem={({ item, section }) => (
             <SectionItem section={section.title} item={item} />
           )}
-          renderSectionHeader={({ section: { title, data } }) =>
-            data.length ? <Text style={styles.sectionHeader}>{title}</Text> : null
-          }
+          renderSectionHeader={({ section: { title, data } }) => {
+            console.log("DATA", JSON.stringify(data));
+            return data.length ? (
+              <Text style={styles.sectionHeader}>{title}</Text>
+            ) : null;
+          }}
         />
       )}
 
@@ -171,8 +177,13 @@ const styles = StyleSheet.create({
   sectionHeader: {
     fontSize: 20,
     fontWeight: "bold",
-  },  card: {
+  },
+  card: {
     marginVertical: 5,
+  },
+  cardTitle: {
+    fontSize: 14,
+    color: "#000000",
   },
   repoContent: {
     display: "flex",

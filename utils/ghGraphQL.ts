@@ -1,134 +1,106 @@
-const uri = "https://api.github.com/graphql";
+import { graphql } from "@octokit/graphql";
+import { SearchResultItemConnection } from "@octokit/graphql-schema";
 
-const headers = new Headers();
-headers.append(
-  "Authorization",
-  "bearer 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"
-);
-headers.append("Content-Type", "application/json");
+const graphqlWithAuth = graphql.defaults({
+  headers: {
+    authorization: `bearer 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`,
+  },
+});
 
 const queries = {
-  repositories: `
-  query ($query: String!) {
-    search(query: $query, first: 10, type: REPOSITORY) {
-      edges {
-        node {
-          ... on Repository {
-            id
-            name
-            owner {
-              avatarUrl
-              login
-            }
-            description
-            watchers {
-              totalCount
-            }
-            languages(first: 1, orderBy: {field: SIZE, direction: DESC}) {
-              edges {
-                node {
-                  id
-                  name
-                  color
-                }
+  repos: `query ($needle: String!) {
+    search(query: $needle, first: 10, type: REPOSITORY) {
+      nodes {
+        ... on Repository {
+          id
+          name
+          owner {
+            avatarUrl
+            login
+          }
+          description
+          watchers {
+            totalCount
+          }
+          languages(first: 1, orderBy: {field: SIZE, direction: DESC}) {
+            edges {
+              node {
+                id
+                name
+                color
               }
             }
-            url
-            nameWithOwner
           }
+          url
+          nameWithOwner
         }
       }
+      repositoryCount
     }
-  }
-  `,
-  issues: `
-query ($query: String!) {
-  search(query: $query, first: 10, type: ISSUE) {
-    edges {
-      node {
+  }`,
+  issues: `query ($needle: String!) {
+    search(query: $needle, first: 10, type: ISSUE) {
+      nodes {
         ... on Issue {
           id
           title
+          state
+          number
           author {
             login
           }
         }
       }
+      issueCount
     }
-  }
-}
-`,
-  users: `
-  query ($query: String!) {
-    search(query: $query, first: 10, type: USER) {
-      edges {
-        node {
-          ... on User {
-            id
-            bio
-            avatarUrl
-            login
-            name
-          }
+  }`,
+  users: `query ($needle: String!) {
+    search(query: $needle, first: 10, type: USER) {
+      nodes {
+        ... on User {
+          id
+          bio
+          avatarUrl
+          login
+          name
         }
       }
+      userCount
     }
-  }
-  `,
+  }`,
 };
 
 const fetchRepositories = async (needle: string) => {
-  return await fetch(uri, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      query: queries.repositories,
-      variables: { query: needle },
-    }),
-    redirect: "follow",
-  })
-    .then((response) => response.text())
-    .then((result) =>
-      JSON.parse(result).data.search.edges.map((edge) => edge.node)
-    )
-    .catch((error) => console.log("error", error));
+  const result = await graphqlWithAuth<{ search: SearchResultItemConnection }>({
+    query: queries.repos,
+    needle,
+  });
+
+  // console.log("COUNT", JSON.stringify(result.search.repositoryCount));
+  // console.log("Nodes", JSON.stringify(result.search.nodes));
+  return result.search.nodes || [];
 };
 
 const fetchIssues = async (needle: string) => {
-  return await fetch(uri, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      query: queries.issues,
-      variables: { query: needle },
-    }),
-    redirect: "follow",
-  })
-    .then((response) => response.text())
-    .then((result) => {
-      console.log("issues", result);
-      return JSON.parse(result).data.search.edges.map((edge) => edge.node);
-    })
-    .catch((error) => console.log("error", error));
+  const result = await graphqlWithAuth<{ search: SearchResultItemConnection }>({
+    query: queries.issues,
+    needle,
+  });
+
+  console.log("Issues:COUNT", JSON.stringify(result.search.issueCount));
+  // console.log("Issues:Nodes", JSON.stringify(result.search.nodes));
+  return result.search.nodes || [];
 };
 
 const fetchUsers = async (needle: string) => {
-  return await fetch(uri, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      query: queries.users,
-      variables: { query: needle },
-    }),
-    redirect: "follow",
-  })
-    .then((response) => response.text())
-    .then((result) =>
-      JSON.parse(result)
-        .data.search.edges.map((edge) => edge.node)
-        .filter((node) => node.id)
-    )
-    .catch((error) => console.log("error", error));
+  const result = await graphqlWithAuth<{ search: SearchResultItemConnection }>({
+    query: queries.users,
+    needle,
+  });
+
+  // console.log("Users:COUNT", JSON.stringify(result.search.userCount));
+  // console.log("Users:Nodes", JSON.stringify(result.search.nodes));
+  return result.search.nodes?.filter((node) => node?.id) || [];
 };
 
 export const GitHubGraphQL = {
