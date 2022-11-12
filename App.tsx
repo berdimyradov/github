@@ -1,9 +1,11 @@
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ApolloProvider } from "@apollo/client";
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import useCachedResources from './hooks/useCachedResources';
-import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
+import useCachedResources from "./hooks/useCachedResources";
+import useColorScheme from "./hooks/useColorScheme";
+import Navigation from "./navigation";
+import { gqlClient } from "./api/gqlClient";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -14,7 +16,9 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
+        <ApolloProvider client={gqlClient}>
+          <Navigation colorScheme={colorScheme} />
+        </ApolloProvider>
         <StatusBar />
       </SafeAreaProvider>
     );

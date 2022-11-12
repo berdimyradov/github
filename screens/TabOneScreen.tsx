@@ -4,7 +4,7 @@ import { SectionList, StyleSheet, Image } from "react-native";
 import { Avatar, Card, List, Paragraph, Searchbar } from "react-native-paper";
 import { View, Text } from "../components/Themed";
 import { RootTabScreenProps } from "../types";
-import { GitHubGraphQL } from "../utils/ghGraphQL";
+import { GitHubService } from "../api/ghService";
 
 const RepositoryCard = (props) => {
   const { nameWithOwner, description, owner, watchers, languages } = props.item;
@@ -108,15 +108,12 @@ export default function TabOneScreen({
     setData([]);
     setIsLoading(true);
     const needle = query.nativeEvent.text;
-    const repos = await GitHubGraphQL.searchRepositories(needle);
-    const issues = await GitHubGraphQL.searchIssues(needle);
-    const users = await GitHubGraphQL.searchUsers(needle);
-    // console.log("REPOS", JSON.stringify(repos));
-    // console.log("ISSUES", JSON.stringify(issues));
-    // console.log("USERS", JSON.stringify(users));
+    const repos = await GitHubService.searchRepositories(needle);
+    const issues = await GitHubService.searchIssues(needle);
+    const users = await GitHubService.searchUsers(needle);
 
     setData([
-      { title: "Repositories", data: repos,  },
+      { title: "Repositories", data: repos },
       { title: "Issues", data: issues },
       { title: "Users", data: users },
     ]);
