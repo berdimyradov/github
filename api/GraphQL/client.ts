@@ -8,4 +8,4 @@ const config = {
   cache: new InMemoryCache(),
 };
 
-export const gqlClient = new ApolloClient(config);
+export const client = new ApolloClient(config);

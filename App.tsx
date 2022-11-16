@@ -5,7 +5,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
-import { gqlClient } from "./api/gqlClient";
+import { client } from "./api/GraphQL/client";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -16,7 +16,7 @@ export default function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <ApolloProvider client={gqlClient}>
+        <ApolloProvider client={client}>
           <Navigation colorScheme={colorScheme} />
         </ApolloProvider>
         <StatusBar />
