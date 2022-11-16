@@ -4,7 +4,7 @@ import { useRoute } from "@react-navigation/native";
 import React, { useCallback } from "react";
 import { FlatList, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Queries } from "../api/GraphQL/Queries";
+import { Queries, QueryType } from "../api/GraphQL/Queries";
 import { Item } from "../components/Item";
 import { Text, View } from "../components/Themed";
 import { needleVar } from "../constants/ReactiveVars";
@@ -13,10 +13,9 @@ export default function ListScreen() {
   const route = useRoute();
   const needle = useReactiveVar(needleVar);
 
-  const { type } = route.params;
-  console.log("ROUTE:VAR", needle, type);
-  const { loading, error, data } = useQuery(Queries[type], {
-    variables: { needle },
+  const { type }: { type: QueryType } = route.params;
+  const { loading, data } = useQuery(Queries[type], {
+    variables: { needle, first: 10 },
   });
 
   const renderItem = useCallback<any>(
@@ -50,11 +49,18 @@ export default function ListScreen() {
           itemCmp = (
             <Item
               left={
-                <Image style={styles.logo} source={{ uri: item.avatarUrl }} />
+                item.avatarUrl && (
+                  <Image
+                    style={styles.logo}
+                    source={{
+                      uri: item.avatarUrl,
+                    }}
+                  />
+                )
               }
               title={item.name}
               description={item.login}
-              footer={<Text>{item.bio}</Text>}
+              footer={item.bio && <Text>{item.bio}</Text>}
             />
           );
           break;
@@ -68,13 +74,21 @@ export default function ListScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <FlatList
-        contentContainerStyle={{}}
-        data={data?.search.nodes.filter((node) => node.id)}
+        contentContainerStyle={styles.listContent}
+        data={data?.search.nodes}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={() => {
+          if (loading) {
+            return (
+              <View style={styles.emptyView}>
+                <Text>Loading...</Text>
+              </View>
+            );
+          }
+
           return (
-            <View style={{}}>
+            <View style={styles.emptyView}>
               <Text style={{ fontSize: 32 }}>Find your stuff.</Text>
               <Text style={{ fontSize: 16, color: "#eee" }}>
                 Search all of GitHub for Repositories, Issues, Users
@@ -90,12 +104,20 @@ export default function ListScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   logo: {
     width: 32,
     height: 32,
     borderRadius: 16,
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  emptyView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

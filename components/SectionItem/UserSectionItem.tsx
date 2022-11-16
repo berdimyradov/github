@@ -5,10 +5,11 @@ import { GoToListLink } from "./GoToListLink";
 import { Item } from "../Item";
 
 export const UserSectionItem = (props) => {
-  if (props.index === 3) {
+  const { item } = props;
+  if (item.count) {
     return (
       <GoToListLink
-        text={`See ${props.userCount} more users`}
+        text={`See ${item.count} more users`}
         list={{
           title: "Users",
           type: "user",
@@ -17,18 +18,21 @@ export const UserSectionItem = (props) => {
     );
   }
 
-  if (props.index > 3) {
-    return null;
-  }
-
   return (
     <Item
       left={
-        <Image style={styles.logo} source={{ uri: props.item.avatarUrl }} />
+        item.avatarUrl && (
+          <Image
+            style={styles.logo}
+            source={{
+              uri: item.avatarUrl,
+            }}
+          />
+        )
       }
-      title={props.item.name}
-      description={props.item.login}
-      footer={<Text>{props.item.bio}</Text>}
+      title={item.name}
+      description={item.login}
+      footer={item.bio && <Text>{item.bio}</Text>}
     />
   );
 };

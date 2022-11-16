@@ -7,30 +7,20 @@ export const SectionItem = ({
   item,
   index,
 }: {
-  section: { title: string; count: number };
+  section: { title: string };
   item: unknown;
   index: number;
 }) => {
   if (section.title === "Repositories") {
-    return (
-      <RepositorySectionItem
-        item={item}
-        index={index}
-        repositoryCount={section.count}
-      />
-    );
+    return <RepositorySectionItem item={item} index={index} />;
   }
 
   if (section.title === "Issues") {
-    return (
-      <IssueSectionItem item={item} index={index} issueCount={section.count} />
-    );
+    return <IssueSectionItem item={item} index={index} />;
   }
 
   if (section.title === "Users") {
-    return (
-      <UserSectionItem item={item} index={index} userCount={section.count} />
-    );
+    return <UserSectionItem item={item} index={index} />;
   }
 
   return null;

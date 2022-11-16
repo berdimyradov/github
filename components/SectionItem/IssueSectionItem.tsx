@@ -4,20 +4,16 @@ import { GoToListLink } from "./GoToListLink";
 import { Item } from "../Item";
 
 export const IssueSectionItem = (props) => {
-  if (props.index === 3) {
+  if (props.item.count) {
     return (
       <GoToListLink
-        text={`See ${props.issueCount} more issues`}
+        text={`See ${props.item.count} more issues`}
         list={{
           title: "Issues",
           type: "issue",
         }}
       />
     );
-  }
-
-  if (props.index > 3) {
-    return null;
   }
 
   return (

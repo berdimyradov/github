@@ -2,8 +2,8 @@ import { gql, TypedDocumentNode } from "@apollo/client";
 import { RepositoriesQuery, IssuesQuery, UsersQuery } from "../types";
 
 const GET_REPOSITORIES: TypedDocumentNode<RepositoriesQuery> = gql`
-  query ($needle: String!) {
-    search(query: $needle, first: 10, type: REPOSITORY) {
+  query ($needle: String!, $first: Int!) {
+    search(query: $needle, first: $first, type: REPOSITORY) {
       nodes {
         ... on Repository {
           id
@@ -35,8 +35,8 @@ const GET_REPOSITORIES: TypedDocumentNode<RepositoriesQuery> = gql`
 `;
 
 const GET_ISSUES: TypedDocumentNode<IssuesQuery> = gql`
-  query ($needle: String!) {
-    search(query: $needle, first: 10, type: ISSUE) {
+  query ($needle: String!, $first: Int!) {
+    search(query: $needle, first: $first, type: ISSUE) {
       nodes {
         ... on Issue {
           id
@@ -54,8 +54,8 @@ const GET_ISSUES: TypedDocumentNode<IssuesQuery> = gql`
 `;
 
 const GET_USERS: TypedDocumentNode<UsersQuery> = gql`
-  query ($needle: String!) {
-    search(query: $needle, first: 10, type: USER) {
+  query ($needle: String!, $first: Int!) {
+    search(query: $needle, first: $first, type: USER) {
       nodes {
         ... on User {
           id

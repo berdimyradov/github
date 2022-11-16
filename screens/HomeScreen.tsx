@@ -12,7 +12,7 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
   const needle = useReactiveVar(needleVar);
   const [search, setSearch] = useState(needleVar);
 
-  const options = { variables: { needle } };
+  const options = { variables: { needle, first: 3 } };
   const [getRs, r] = useLazyQuery(Queries.repository, options);
   const [getIs, i] = useLazyQuery(Queries.issue, options);
   const [getUs, u] = useLazyQuery(Queries.user, options);
@@ -26,26 +26,27 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
 
   const isLoading = r.loading || i.loading || u.loading;
   const isCalled = r.called || i.called || u.called;
-  const sections: { title: string; data: {}[]; count: number }[] =
+  const sections: { title: string; data: {}[]; count?: number }[] =
     useMemo(() => {
       if (isLoading || !isCalled) {
         return [];
       }
+
       return [
         {
           title: "Repositories",
-          data: r.data?.search.nodes || [],
-          count: r.data?.search.repositoryCount || 0,
+          data: [
+            ...r.data?.search.nodes,
+            { count: r.data?.search.repositoryCount },
+          ],
         },
         {
           title: "Issues",
-          data: i.data?.search.nodes.filter((node) => node.id) || [],
-          count: i.data?.search.issueCount || 0,
+          data: [...i.data?.search.nodes, { count: i.data?.search.issueCount }],
         },
         {
           title: "Users",
-          data: u.data?.search.nodes.filter((node) => node.id) || [],
-          count: u.data?.search.userCount || 0,
+          data: [...u.data?.search.nodes, { count: u.data?.search.userCount }],
         },
       ];
     }, [r.data, i.data, u.data]);
@@ -63,14 +64,14 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
       <SectionList
         contentContainerStyle={styles.listContent}
         sections={sections}
-        keyExtractor={(item, index) => item.id + index}
+        keyExtractor={(item, index) => `${item.id} + ${index}`}
+        renderSectionHeader={({ section: { title, data } }) =>
+          data.length ? <Text style={styles.sectionHeader}>{title}</Text> : null
+        }
         renderItem={(el) => {
           const { item, section, index } = el;
           return <SectionItem section={section} item={item} index={index} />;
         }}
-        renderSectionHeader={({ section: { title, data } }) =>
-          data.length ? <Text style={styles.sectionHeader}>{title}</Text> : null
-        }
         stickySectionHeadersEnabled={false}
         ListEmptyComponent={() => {
           if (isLoading) {
