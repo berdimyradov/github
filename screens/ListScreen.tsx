@@ -4,10 +4,10 @@ import React from "react";
 import { FlatList, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Queries, QueryType } from "../api/GraphQL/Queries";
-import { nodeMapper } from "../api/utils";
+import { nodeMapper } from "../api/nodeMapper";
 import { EmptyList } from "../components/EmptyList";
 import { Item } from "../components/Item";
-import { needleVar } from "../constants/ReactiveVars";
+import { needleVar, selectedNodeVar } from "../constants/ReactiveVars";
 
 export default function ListScreen() {
   const route = useRoute();
@@ -24,7 +24,16 @@ export default function ListScreen() {
         contentContainerStyle={styles.listContent}
         data={data?.search.nodes.map(nodeMapper)}
         keyExtractor={(item, index) => `${item.id} + ${index}`}
-        renderItem={({ item }) => <Item {...item} />}
+        renderItem={({ item }) => (
+          <Item
+            {...item}
+            onPress={() => {
+              selectedNodeVar(
+                data?.search.nodes.find((node) => node.id === item.id)
+              );
+            }}
+          />
+        )}
         ListEmptyComponent={() => <EmptyList loading={loading} />}
       />
     </SafeAreaView>

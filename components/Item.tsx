@@ -11,22 +11,18 @@ export type ItemProps = {
   title: string;
   description: string;
   footer?: React.ReactNode;
+  onPress?: () => void
 };
 
 export const Item = (props: ItemProps) => {
   const { id, type, left, title, description, footer } = props;
   const navigation = useNavigation();
 
-  console.log("PROPS", props);
   return (
     <TouchableHighlight
       onPress={() => {
-        navigation.navigate("Modal", {
-          id,
-          type,
-          title,
-          description,
-        });
+        props.onPress();
+        navigation.navigate("Modal", { type });
       }}
     >
       <View style={styles.container}>

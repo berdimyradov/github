@@ -9,7 +9,6 @@ import {
 } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { QueryType } from "./api/GraphQL/Queries";
-import { ItemProps } from "./components/Item";
 
 declare global {
   namespace ReactNavigation {
@@ -19,7 +18,7 @@ declare global {
 
 export type RootStackParamList = {
   Root: NavigatorScreenParams<MainStackParamList> | undefined;
-  Modal: ItemProps | undefined;
+  Modal: { type: QueryType }
   NotFound: undefined;
 };
 

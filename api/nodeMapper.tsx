@@ -2,18 +2,9 @@ import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { Repository, Issue, User } from "@octokit/graphql-schema";
 import React from "react";
 import { Image, Text, StyleSheet, View } from "react-native";
-import { QueryType } from "./GraphQL/Queries";
-
-type Input = Repository | Issue | User;
-
-type Output = {
-  id: string;
-  type: QueryType;
-  left: any;
-  title: string;
-  description: string;
-  footer?: React.ReactNode;
-};
+import { ItemProps } from "../components/Item";
+import { makeId } from "../utils/makeId";
+import { numberToString } from "../utils/numberToString";
 
 const octokitIcon =
   "https://docs.github.com/assets/cb-600/images/site/favicon.png";
@@ -21,16 +12,7 @@ const defaultTitle = "No title";
 const defaultDescription = "Ooops! Somehow GitHub returned empty node";
 const defaultFooter = "Defected object";
 
-const makeId = () => {
-  let ID = "";
-  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  for (var i = 0; i < 12; i++) {
-    ID += characters.charAt(Math.floor(Math.random() * 36));
-  }
-  return ID;
-};
-
-export const nodeMapper = (item: Input): Output => {
+export const nodeMapper = (item: Repository | Issue | User): ItemProps => {
   if (item.__typename === "Repository") {
     return {
       id: item.id,
@@ -43,7 +25,9 @@ export const nodeMapper = (item: Input): Output => {
       footer: (
         <View style={styles.footer}>
           <FontAwesome name="star-o" size={24} color="#7d7d7d" />
-          <Text style={styles.metaInfoText}>{item.watchers.totalCount}</Text>
+          <Text style={styles.metaInfoText}>
+            {numberToString(item.stargazers.totalCount)}
+          </Text>
           <FontAwesome
             name="circle"
             size={24}

@@ -13,6 +13,22 @@ const GET_REPOSITORIES: TypedDocumentNode<RepositoriesQuery> = gql`
             login
           }
           description
+          url
+          nameWithOwner
+          homepageUrl
+          forkCount
+          stargazers {
+            totalCount
+          }
+          issues {
+            totalCount
+          }
+          pullRequests {
+            totalCount
+          }
+          releases {
+            totalCount
+          }
           watchers {
             totalCount
           }
@@ -25,8 +41,6 @@ const GET_REPOSITORIES: TypedDocumentNode<RepositoriesQuery> = gql`
               }
             }
           }
-          url
-          nameWithOwner
         }
       }
       repositoryCount
@@ -70,10 +84,10 @@ const GET_USERS: TypedDocumentNode<UsersQuery> = gql`
   }
 `;
 
-export type QueryType =  "repository" | "issue" | "user"
+export type QueryType = "repository" | "issue" | "user";
 
-export const Queries: {[key in QueryType]: TypedDocumentNode} = {
+export const Queries: { [key in QueryType]: TypedDocumentNode } = {
   repository: GET_REPOSITORIES,
   issue: GET_ISSUES,
-  user: GET_USERS
-}
+  user: GET_USERS,
+};

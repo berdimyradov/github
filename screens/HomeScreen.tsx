@@ -1,18 +1,20 @@
 import { useLazyQuery, useReactiveVar } from "@apollo/client";
 import React, { useMemo, useState } from "react";
 import {
-  NativeSyntheticEvent, SafeAreaView,
+  NativeSyntheticEvent,
+  SafeAreaView,
   SectionList,
-  StyleSheet, TextInputSubmitEditingEventData
+  StyleSheet,
+  TextInputSubmitEditingEventData,
 } from "react-native";
 import { Searchbar } from "react-native-paper";
 import { Queries, QueryType } from "../api/GraphQL/Queries";
-import { nodeMapper } from "../api/utils";
+import { nodeMapper } from "../api/nodeMapper";
 import { EmptyList } from "../components/EmptyList";
 import { GoToListLink } from "../components/GoToListLink";
 import { Item } from "../components/Item";
 import { Text } from "../components/Themed";
-import { needleVar } from "../constants/ReactiveVars";
+import { needleVar, selectedNodeVar } from "../constants/ReactiveVars";
 import { RootScreenProps } from "../types";
 
 type SectionType = {
@@ -23,7 +25,7 @@ type SectionType = {
 
 type ItemType = {
   id: string;
-  type: QueryType,
+  type: QueryType;
   left: React.ReactNode;
   title: string;
   description: string;
@@ -99,7 +101,19 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
       );
     }
 
-    return <Item {...item} />;
+    return (
+      <Item
+        {...item}
+        onPress={() => {
+          const source =
+            item.type === "repository" ? r : item.type === "issue" ? i : u;
+          const selected = source?.data?.search.nodes.find(
+            (node) => node.id === item.id
+          );
+          selectedNodeVar(selected);
+        }}
+      />
+    );
   };
 
   return (
