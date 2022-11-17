@@ -2,8 +2,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { StyleSheet, TouchableHighlight } from "react-native";
-import { QueryType } from "../../api/GraphQL/Queries";
-import { Text, View } from "../Themed";
+import { QueryType } from "../api/GraphQL/Queries";
+import { Text, View } from "./Themed";
 
 type Props = {
   text: string;
@@ -15,7 +15,6 @@ type Props = {
 
 export const GoToListLink = ({ text, list }: Props) => {
   const navigation = useNavigation();
-  // console.log("NAV", navigation);
 
   return (
     <TouchableHighlight

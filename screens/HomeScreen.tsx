@@ -1,12 +1,32 @@
 import { useLazyQuery, useReactiveVar } from "@apollo/client";
 import React, { useMemo, useState } from "react";
-import { SafeAreaView, SectionList, StyleSheet } from "react-native";
+import {
+  NativeSyntheticEvent, SafeAreaView,
+  SectionList,
+  StyleSheet, TextInputSubmitEditingEventData
+} from "react-native";
 import { Searchbar } from "react-native-paper";
-import { Queries } from "../api/GraphQL/Queries";
-import { SectionItem } from "../components/SectionItem";
-import { Text, View } from "../components/Themed";
+import { Queries, QueryType } from "../api/GraphQL/Queries";
+import { nodeMapper } from "../api/utils";
+import { EmptyList } from "../components/EmptyList";
+import { GoToListLink } from "../components/GoToListLink";
+import { Item } from "../components/Item";
+import { Text } from "../components/Themed";
 import { needleVar } from "../constants/ReactiveVars";
 import { RootScreenProps } from "../types";
+
+type SectionType = {
+  title: string;
+  data: {}[];
+  count?: number;
+};
+
+type ItemType = {
+  left: React.ReactNode;
+  title: string;
+  description: string;
+  footer: React.ReactNode;
+} & { count: number; type: QueryType };
 
 export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
   const needle = useReactiveVar(needleVar);
@@ -17,7 +37,9 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
   const [getIs, i] = useLazyQuery(Queries.issue, options);
   const [getUs, u] = useLazyQuery(Queries.user, options);
 
-  const onSubmit = (query) => {
+  const onSubmit = (
+    query: NativeSyntheticEvent<TextInputSubmitEditingEventData>
+  ) => {
     needleVar(query.nativeEvent.text);
     getRs();
     getIs();
@@ -26,30 +48,57 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
 
   const isLoading = r.loading || i.loading || u.loading;
   const isCalled = r.called || i.called || u.called;
-  const sections: { title: string; data: {}[]; count?: number }[] =
-    useMemo(() => {
-      if (isLoading || !isCalled) {
-        return [];
-      }
+  const sections: SectionType[] = useMemo(() => {
+    if (isLoading || !isCalled) {
+      return [];
+    }
 
-      return [
-        {
-          title: "Repositories",
-          data: [
-            ...r.data?.search.nodes,
-            { count: r.data?.search.repositoryCount },
-          ],
-        },
-        {
-          title: "Issues",
-          data: [...i.data?.search.nodes, { count: i.data?.search.issueCount }],
-        },
-        {
-          title: "Users",
-          data: [...u.data?.search.nodes, { count: u.data?.search.userCount }],
-        },
-      ];
-    }, [r.data, i.data, u.data]);
+    return [
+      {
+        title: "Repositories",
+        data: [
+          ...r.data?.search.nodes.map(nodeMapper),
+          { count: r.data?.search.repositoryCount, type: "repository" },
+        ],
+      },
+      {
+        title: "Issues",
+        data: [
+          ...i.data?.search.nodes.map(nodeMapper),
+          { count: i.data?.search.issueCount, type: "issue" },
+        ],
+      },
+      {
+        title: "Users",
+        data: [
+          ...u.data?.search.nodes.map(nodeMapper),
+          { count: u.data?.search.userCount, type: "user" },
+        ],
+      },
+    ];
+  }, [r.data, i.data, u.data]);
+
+  const renderItem = ({
+    item,
+    section,
+  }: {
+    item: ItemType;
+    section: SectionType;
+  }) => {
+    if (item.count) {
+      return (
+        <GoToListLink
+          text={`See ${item.count} more ${section.title.toLocaleLowerCase()}`}
+          list={{
+            title: section.title,
+            type: item.type,
+          }}
+        />
+      );
+    }
+
+    return <Item {...item} />;
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,29 +117,9 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
         renderSectionHeader={({ section: { title, data } }) =>
           data.length ? <Text style={styles.sectionHeader}>{title}</Text> : null
         }
-        renderItem={(el) => {
-          const { item, section, index } = el;
-          return <SectionItem section={section} item={item} index={index} />;
-        }}
+        renderItem={renderItem}
         stickySectionHeadersEnabled={false}
-        ListEmptyComponent={() => {
-          if (isLoading) {
-            return (
-              <View style={styles.emptyView}>
-                <Text>Loading...</Text>
-              </View>
-            );
-          }
-
-          return (
-            <View style={styles.emptyView}>
-              <Text style={{ fontSize: 32 }}>Find your stuff.</Text>
-              <Text style={{ fontSize: 16, color: "#eee" }}>
-                Search all of GitHub for Repositories, Issues, Users
-              </Text>
-            </View>
-          );
-        }}
+        ListEmptyComponent={() => <EmptyList loading={isLoading} />}
       />
     </SafeAreaView>
   );
@@ -112,10 +141,5 @@ const styles = StyleSheet.create({
     marginStart: 15,
     fontSize: 20,
     fontWeight: "bold",
-  },
-  emptyView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
