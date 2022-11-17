@@ -1,16 +1,19 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet } from 'react-native';
-
-import { Text, View } from '../components/Themed';
+import { useRoute } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet } from "react-native";
+import { Item } from "../components/Item";
+import { Text, View } from "../components/Themed";
 
 export default function ModalScreen() {
+  const route = useRoute();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
+      <Item {...route.params} />
+      <Text>{JSON.stringify(route.params)}</Text>
 
       {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
+      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
     </View>
   );
 }
@@ -18,16 +21,9 @@ export default function ModalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+    fontWeight: "bold",
   },
 });

@@ -2,10 +2,13 @@ import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
 import { Repository, Issue, User } from "@octokit/graphql-schema";
 import React from "react";
 import { Image, Text, StyleSheet, View } from "react-native";
+import { QueryType } from "./GraphQL/Queries";
 
 type Input = Repository | Issue | User;
 
 type Output = {
+  id: string;
+  type: QueryType;
   left: any;
   title: string;
   description: string;
@@ -18,9 +21,20 @@ const defaultTitle = "No title";
 const defaultDescription = "Ooops! Somehow GitHub returned empty node";
 const defaultFooter = "Defected object";
 
+const makeId = () => {
+  let ID = "";
+  let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  for (var i = 0; i < 12; i++) {
+    ID += characters.charAt(Math.floor(Math.random() * 36));
+  }
+  return ID;
+};
+
 export const nodeMapper = (item: Input): Output => {
   if (item.__typename === "Repository") {
     return {
+      id: item.id,
+      type: "repository",
       left: (
         <Image style={styles.logo} source={{ uri: item.owner.avatarUrl }} />
       ),
@@ -44,6 +58,8 @@ export const nodeMapper = (item: Input): Output => {
   }
   if (item.__typename === "Issue") {
     return {
+      id: item.id,
+      type: "issue",
       left: <FontAwesome5 name="dot-circle" size={24} color="green" />,
       title: `${item.repository.nameWithOwner}  #${item.number}`,
       description: item.title,
@@ -51,6 +67,8 @@ export const nodeMapper = (item: Input): Output => {
   }
   if (item.__typename === "User") {
     return {
+      id: item.id,
+      type: "user",
       left: (
         <Image
           style={styles.logo}
@@ -64,6 +82,8 @@ export const nodeMapper = (item: Input): Output => {
   }
 
   return {
+    id: makeId(),
+    type: "user",
     left: <Image style={styles.logo} source={{ uri: octokitIcon }} />,
     title: defaultTitle,
     description: defaultDescription,

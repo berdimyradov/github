@@ -22,6 +22,8 @@ type SectionType = {
 };
 
 type ItemType = {
+  id: string;
+  type: QueryType,
   left: React.ReactNode;
   title: string;
   description: string;

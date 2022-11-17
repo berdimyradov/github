@@ -58,7 +58,14 @@ function RootNavigator() {
         options={{ title: "Oops!" }}
       />
       <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen name="Modal" component={ModalScreen} />
+        <Stack.Screen
+          name="Modal"
+          component={ModalScreen}
+          options={({ route }) => {
+            const { type: title } = route.params;
+            return { title: title[0].toUpperCase() + title.substring(1) };
+          }}
+        />
       </Stack.Group>
     </Stack.Navigator>
   );

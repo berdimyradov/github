@@ -1,28 +1,32 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import {
-  ImageSourcePropType,
-  StyleSheet,
-  TouchableHighlight,
-} from "react-native";
+import { StyleSheet, TouchableHighlight } from "react-native";
+import { QueryType } from "../api/GraphQL/Queries";
 import { Text, View } from "./Themed";
 
-type Props = {
-  source?: ImageSourcePropType;
+export type ItemProps = {
+  id: string;
+  type: QueryType;
   left: React.ReactNode;
   title: string;
   description: string;
   footer?: React.ReactNode;
 };
 
-export const Item = (props: Props) => {
-  const { left, title, description, footer } = props;
+export const Item = (props: ItemProps) => {
+  const { id, type, left, title, description, footer } = props;
   const navigation = useNavigation();
 
+  console.log("PROPS", props);
   return (
     <TouchableHighlight
       onPress={() => {
-        navigation.navigate("Modal");
+        navigation.navigate("Modal", {
+          id,
+          type,
+          title,
+          description,
+        });
       }}
     >
       <View style={styles.container}>
