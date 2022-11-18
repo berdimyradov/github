@@ -1,5 +1,5 @@
 import { useLazyQuery, useReactiveVar } from "@apollo/client";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   NativeSyntheticEvent,
   SafeAreaView,
@@ -13,7 +13,7 @@ import { nodeMapper } from "../api/nodeMapper";
 import { EmptyList } from "../components/EmptyList";
 import { GoToListLink } from "../components/GoToListLink";
 import { Item } from "../components/Item";
-import { Text } from "../components/Themed";
+import { View, Text } from "../components/Themed";
 import { needleVar, selectedNodeVar } from "../constants/ReactiveVars";
 import { RootScreenProps } from "../types";
 
@@ -34,12 +34,30 @@ type ItemType = {
 
 export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
   const needle = useReactiveVar(needleVar);
-  const [search, setSearch] = useState(needleVar);
+  const [search, setSearch] = useState(needle);
 
   const options = { variables: { needle, first: 3 } };
   const [getRs, r] = useLazyQuery(Queries.repository, options);
   const [getIs, i] = useLazyQuery(Queries.issue, options);
   const [getUs, u] = useLazyQuery(Queries.user, options);
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: () => {
+        return (
+          <SafeAreaView style={styles.searchContainer}>
+            <Searchbar
+              style={styles.search}
+              placeholder="Search in GitHub"
+              onChangeText={setSearch}
+              onSubmitEditing={onSubmit}
+              value={search}
+            />
+          </SafeAreaView>
+        );
+      },
+    });
+  }, [search]);
 
   const onSubmit = (
     query: NativeSyntheticEvent<TextInputSubmitEditingEventData>
@@ -118,15 +136,8 @@ export default function HomeScreen({ navigation }: RootScreenProps<"Home">) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Searchbar
-        style={styles.search}
-        placeholder="Search in GitHub"
-        onChangeText={setSearch}
-        onSubmitEditing={onSubmit}
-        value={search}
-      />
-
       <SectionList
+        onScrollToTop={(i) => console.log("onScrollTop")}
         contentContainerStyle={styles.listContent}
         sections={sections}
         keyExtractor={(item, index) => `${item.id} + ${index}`}
@@ -145,8 +156,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  searchContainer: {
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderColor: "#d8dae1",
+  },
   search: {
-    marginVertical: 5,
+    backgroundColor: "#d8dae1",
+    margin: 5,
+    marginBottom: 15,
+    height: 36,
+    borderRadius: 12,
+    shadowOpacity: 0,
   },
   listContent: {
     flexGrow: 1,
